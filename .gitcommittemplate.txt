@@ -1,0 +1,6 @@
+# Tipo: feat|fix|docs|style|refactor|test|chore
+<tipo>(Issue #YY): <descrição breve até 50 caracteres>
+
+<corpo opcional>
+
+<rodapé opcional>
