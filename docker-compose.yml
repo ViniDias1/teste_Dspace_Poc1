@@ -1,0 +1,87 @@
+# docker-compose.yml
+networks:
+  dspace-net:
+    driver: bridge
+
+volumes:
+  assetstore:
+  pgdata:
+  solr-data:
+
+services:
+  # Banco de dados PostgreSQL
+  dspace-db:
+    container_name: dspace-db
+    image: postgres:14
+    networks:
+      - dspace-net
+    environment:
+      - POSTGRES_DB=dspace
+      - POSTGRES_USER=dspace
+      - POSTGRES_PASSWORD=dspace
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+
+  # Serviço de busca e indexação Solr
+  dspace-solr:
+    container_name: dspace-solr
+    image: dspace/dspace-solr
+    networks:
+      - dspace-net
+    volumes:
+      - solr-data:/var/solr
+    restart: always
+
+  # Backend do DSpace (API REST)
+  dspace:
+    container_name: dspace
+    image: dspace/dspace:dspace-9.0
+    networks:
+      - dspace-net
+    ports:
+      - "8080:8080"
+    volumes:
+      - assetstore:/dspace/assetstore
+    environment:
+      - DSPACE_DB_HOST=dspace-db
+      - DSPACE_DB_PORT=5432
+      - DSPACE_DB_USERNAME=dspace
+      - DSPACE_DB_PASSWORD=dspace
+      - DSPACE_DB_SCHEMA=public
+      - DSPACE_SOLR_HOST=dspace-solr
+      - DSPACE_SOLR_PORT=8983
+      - DSPACE_UI_URL=http://localhost:4000
+    depends_on:
+      - dspace-db
+      - dspace-solr
+    restart: always
+
+  # Frontend do DSpace (Interface Gráfica)
+  dspace-angular:
+    container_name: dspace-angular
+    image: dspace/dspace-angular:dspace-9.0
+    networks:
+      - dspace-net
+    ports:
+      - "4000:4000"
+    environment:
+      - DSPACE_UI_API_URL=http://localhost:8080
+    depends_on:
+      - dspace
+    restart: always
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - dspace-net
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - dspace-db
