@@ -15,6 +15,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException('Credenciais inválidas.');
     }
-    return user; // O objeto user será anexado a req.user
+    return user;
   }
 }

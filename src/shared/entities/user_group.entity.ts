@@ -5,11 +5,10 @@ import { Group } from './group.entity';
 
 @Entity('user_groups')
 export class UserGroup {
-  @PrimaryColumn('uuid') // user_id é parte da chave primária composta
+  @PrimaryColumn('uuid')
   userId: string;
 
-  @PrimaryColumn('uuid') // group_id é parte da chave primária composta
-  groupId: string;
+  @PrimaryColumn('uuid')
 
   @ManyToOne(() => User, user => user.userGroups, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })

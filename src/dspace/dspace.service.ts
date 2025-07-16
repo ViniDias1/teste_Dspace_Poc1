@@ -14,13 +14,12 @@ export class DSpaceService {
 
   constructor() {
     this.axiosInstance = axios.create({
-      baseURL: process.env.DSPACE_API_URL, // Ex: http://localhost:8080/server/api
+      baseURL: process.env.DSPACE_API_URL,
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    // Interceptor para adicionar o token de autorização
     this.axiosInstance.interceptors.request.use(
       async (config) => {
         if (this.accessToken && !config.headers['Authorization']) {
@@ -31,7 +30,6 @@ export class DSpaceService {
       (error) => Promise.reject(error),
     );
 
-    // Interceptor para lidar com erros de autenticação (token expirado, inválido)
     this.axiosInstance.interceptors.response.use(
       (response) => response,
       async (error) => {
@@ -42,17 +40,16 @@ export class DSpaceService {
           try {
             await this.authenticate();
             originalRequest.headers['Authorization'] = `Bearer ${this.accessToken}`;
-            return this.axiosInstance(originalRequest); // Repete a requisição original
+            return this.axiosInstance(originalRequest);
           } catch (authError) {
             this.logger.error('Falha na reautenticação com o DSpace:', authError.message);
-            // Poderíamos relançar uma exceção mais específica ou cair para o erro original
           }
         }
         return Promise.reject(error);
       },
     );
 
-    this.authenticate(); // Autentica no início da aplicação
+    this.authenticate();
   }
 
   private async authenticate(): Promise<void> {
@@ -72,40 +69,37 @@ export class DSpaceService {
         password: adminPassword,
       });
 
-      // DSpace 7 usa 'authentication-token' no header ou 'token' no body dependendo da configuração
       this.accessToken = response.headers['authentication-token'] || response.data.token;
       if (!this.accessToken) {
           throw new Error('Token de autenticação do DSpace não encontrado na resposta.');
       }
       this.logger.log('Autenticação no DSpace bem-sucedida.');
 
-      // Opcional: Implementar renovação do token antes de expirar
-      // DSpace 7 por padrão, o token expira em 30 minutos (1800 segundos)
+
       if (this.tokenExpirationTimeout) {
         clearTimeout(this.tokenExpirationTimeout);
       }
-      // Renova 5 minutos antes de expirar, se o token tiver tempo de vida definido
-      const expiresInSeconds = 1800; // Valor padrão do DSpace 7
+
+      const expiresInSeconds = 1800;
       this.tokenExpirationTimeout = setTimeout(() => {
         this.logger.log('Renovando token DSpace...');
         this.authenticate();
-      }, (expiresInSeconds - 300) * 1000); // 5 minutos antes da expiração
+      }, (expiresInSeconds - 300) * 1000);
     } catch (error) {
       this.logger.error('Erro ao autenticar no DSpace:', error.response?.data || error.message);
       throw new UnauthorizedException('Falha na autenticação com o DSpace.');
     }
   }
 
-  // --- Métodos de CRUD para ePersons no DSpace ---
 
   async createEperson(email: string, password: string, name: string): Promise<string> {
     try {
       const response = await this.axiosInstance.post('/eperson/epersons', {
         email,
-        password, // DSpace espera a senha em texto claro na criação
+        password,
         name,
       });
-      const epersonId = response.data.id; // DSpace 7 retorna o ID no body
+      const epersonId = response.data.id;
       this.logger.log(`ePerson '${email}' criado no DSpace com ID: ${epersonId}`);
       return epersonId;
     } catch (error) {
@@ -124,12 +118,12 @@ export class DSpaceService {
       if (updates.name !== undefined) {
         patchOperations.push({ op: 'replace', path: '/name', value: updates.name });
       }
-      if (updates.isActive !== undefined) {
-          patchOperations.push({ op: 'replace', path: '/canLogIn', value: updates.isActive }); // 'canLogIn' controla a ativação
+      if (updates.isActive !== undefined) { 
+          patchOperations.push({ op: 'replace', path: '/canLogIn', value: updates.isActive });
       }
 
       await this.axiosInstance.patch(`/eperson/epersons/${epersonId}`, patchOperations, {
-        headers: { 'Content-Type': 'application/json-patch+json' }, // DSpace espera esse Content-Type para PATCH
+        headers: { 'Content-Type': 'application/json-patch+json' },
       });
       this.logger.log(`ePerson '${epersonId}' atualizado no DSpace.`);
     } catch (error) {

@@ -4,6 +4,6 @@ import { DSpaceService } from './dspace.service';
 
 @Module({
   providers: [DSpaceService],
-  exports: [DSpaceService], // Exporta para ser usado em outros módulos
+  exports: [DSpaceService],
 })
 export class DSpaceModule {}

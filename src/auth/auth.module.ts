@@ -3,31 +3,31 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config'; // Para carregar configurações JWT
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User } from '../shared/entities/user.entity';
-import { JwtStrategy } from './jwt.strategy'; // Sua estratégia JWT
-import { LocalStrategy } from './local.strategy'; // Sua estratégia Local (para login)
-import { DSpaceModule } from '../dspace/dspace.module'; // Importa o módulo do DSpace
+import { JwtStrategy } from './jwt.strategy';
+import { LocalStrategy } from './local.strategy';
+import { DSpaceModule } from '../dspace/dspace.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
-    DSpaceModule, // Importa o DSpaceModule para usar o DSpaceService
+    DSpaceModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '60m' }, // Token expira em 60 minutos
+        signOptions: { expiresIn: '60m' },
       }),
       inject: [ConfigService],
     }),
-    ConfigModule, // Adicione ConfigModule para usar ConfigService
+    ConfigModule,
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy], // Adicione suas estratégias
+  providers: [AuthService, LocalStrategy, JwtStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

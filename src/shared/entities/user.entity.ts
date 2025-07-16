@@ -1,17 +1,17 @@
 // src/shared/entities/user.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { OneToMany } from 'typeorm'; // Importar OneToMany
-import { UserGroup } from './user_group.entity'; // Importa a entidade de ligação
-@Entity('users') // Nome da tabela no DB
+import { OneToMany } from 'typeorm';
+import { UserGroup } from './user_group.entity';
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true, length: 255 }) // typeorm mapeia VARCHAR(255) por padrão com length
+  @Column({ unique: true, length: 255 })
   email: string;
 
-  @Column({ name: 'password_hash', length: 255 }) // <--- ATENÇÃO AQUI: explicitamente nomeando a coluna
-  password: string; // Essa propriedade armazena o hash
+  @Column({ name: 'password_hash', length: 255 })
+  password: string;
 
   @Column({ nullable: true, length: 255 })
   firstName: string;
@@ -20,7 +20,7 @@ export class User {
   lastName: string;
 
   @Column({ unique: true, nullable: true })
-  dspaceEpersonUuid: string; // ID do ePerson no DSpace
+  dspaceEpersonUuid: string;
 
   @Column({ default: true })
   isActive: boolean;
@@ -31,7 +31,6 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-    // --- NOVO: Relação com user_groups ---
   @OneToMany(() => UserGroup, userGroup => userGroup.user)
   userGroups: UserGroup[];  
 }

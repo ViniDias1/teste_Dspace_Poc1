@@ -7,6 +7,8 @@ volumes:
   assetstore:
   pgdata:
   solr-data:
+  dspace-log:
+  config:
 
 services:
   # Banco de dados PostgreSQL
@@ -45,6 +47,8 @@ services:
       - "8080:8080"
     volumes:
       - assetstore:/dspace/assetstore
+      - config:/dspace/config       # <- Monta a pasta local ./config
+      - dspace-log:/dspace/log
     environment:
       - DSPACE_DB_HOST=dspace-db
       - DSPACE_DB_PORT=5432

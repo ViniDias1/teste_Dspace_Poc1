@@ -2,7 +2,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config'; // Para obter a chave JWT
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -19,7 +19,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    // 'payload' é o que você assinou no JWT (sub e email no nosso caso)
-    return { userId: payload.sub, email: payload.email }; // Anexa a req.user
+    return { userId: payload.sub, email: payload.email };
   }
 }
