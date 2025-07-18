@@ -16,13 +16,11 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     networks:
-      - dspacenet
-    depends_on:
-      - dspacedb
+      - d9_dspacenet
 
 volumes:
   pgadmin-data:
 
 networks:
-  dspacenet:
+  d9_dspacenet:
     external: true
