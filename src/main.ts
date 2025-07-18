@@ -1,15 +1,23 @@
-// src/main.ts
 import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true, // Remove propriedades que não estão no DTO
-    forbidNonWhitelisted: true, // Erro se houver propriedades não permitidas
-    transform: true, // Transforma payloads para instâncias de DTOs
-  }));
-  await app.listen(3000);
+
+  const config = new DocumentBuilder()
+    .setTitle('HipoRepo API Documentation')
+    .setDescription('HipoRepo API - A simple and efficient interface' +
+       ' for managing and querying repositories, ideal for system integration and automation.')
+    .setVersion('1.0')
+    .addTag('API')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('doc', app, documentFactory);
+
+  await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+
+void bootstrap();
